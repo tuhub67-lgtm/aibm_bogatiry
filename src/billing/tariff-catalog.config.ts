@@ -15,8 +15,10 @@ import {
  *   - Лайт: контент-генерация, автопостинг, ровно 1 канал;
  *   - Богатырский: аналитика, многоканальность, приоритет.
  *
- * Числовые лимиты генераций/постов/лендингов в spec НЕ заданы —
- * выставлены разумные заглушки и помечены [TODO: уточнить у заказчика].
+ * Продуктовые решения заказчика (вне spec, подтверждены явно):
+ *   - автопостинг входит в Free, но с жёстким лимитом (10 постов/мес);
+ *   - конструктор сайтов/лендингов — ТОЛЬКО Богатырский;
+ *   - уровень числовых лимитов — «сбалансированный» (значения ниже).
  */
 export const TARIFF_CATALOG: Readonly<Record<Tariff, TariffPlan>> = {
   [Tariff.Free]: {
@@ -25,17 +27,16 @@ export const TARIFF_CATALOG: Readonly<Record<Tariff, TariffPlan>> = {
     priceRub: 0,
     billingPeriod: 'month',
     positioning: 'Точка входа: попробовать силу без согласований и карты.',
-    // Точка входа с ограниченным функционалом (spec). Конструктор сайтов и
-    // контент-генерация доступны в урезанном виде.
-    // [TODO: уточнить у заказчика] входит ли автопостинг в Free — spec упоминает
-    // «лимит генераций/постов», но автопостинг заявлен как фича Лайта.
-    features: [Feature.SiteBuilder, Feature.ContentGeneration],
+    // Решение заказчика: Free даёт контент-генерацию и автопостинг с жёстким
+    // лимитом (даёт «первый трофей» сразу). Конструктор сайтов в Free НЕ входит
+    // (только Богатырский). Полный набор автоматизации (боты/воронки) — от Лайта.
+    features: [Feature.ContentGeneration, Feature.Autoposting],
     limits: {
-      // [TODO: уточнить у заказчика] точные лимиты Free в spec не зафиксированы.
       [LimitKey.ContentGenerationsPerMonth]: 10,
-      [LimitKey.ScheduledPostsPerMonth]: 10,
+      [LimitKey.ScheduledPostsPerMonth]: 10, // жёсткий лимит автопостинга для Free
       [LimitKey.ConnectedChannels]: 1,
-      [LimitKey.LandingPages]: 1,
+      // Конструктор сайтов недоступен на Free → лимит лендингов неактуален.
+      [LimitKey.LandingPages]: 0,
     },
     priority: false,
   },
@@ -46,21 +47,20 @@ export const TARIFF_CATALOG: Readonly<Record<Tariff, TariffPlan>> = {
     priceRub: 990, // spec
     billingPeriod: 'month',
     positioning: 'В 30–150 раз дешевле SMM-человека за сопоставимый результат.',
-    // spec: контент-генерация + автопостинг + 1 канал.
-    // [TODO: уточнить у заказчика] входит ли полноценный конструктор сайтов в Лайт
-    // (включён по умолчанию как базовая ценность).
+    // spec: контент-генерация + автопостинг + 1 канал. Полная автоматизация
+    // (боты/воронки/CRM-логика) включена. Конструктор сайтов — решение заказчика:
+    // только Богатырский, поэтому в Лайт НЕ входит.
     features: [
-      Feature.SiteBuilder,
       Feature.ContentGeneration,
       Feature.MarketingAutomation,
       Feature.Autoposting,
     ],
     limits: {
-      // [TODO: уточнить у заказчика] числовые лимиты генераций/постов для Лайта.
       [LimitKey.ContentGenerationsPerMonth]: 100,
       [LimitKey.ScheduledPostsPerMonth]: 100,
       [LimitKey.ConnectedChannels]: 1, // spec: «1 соцсеть/канал»
-      [LimitKey.LandingPages]: 3, // [TODO: уточнить у заказчика]
+      // Конструктор сайтов недоступен на Лайте → лимит лендингов неактуален.
+      [LimitKey.LandingPages]: 0,
     },
     priority: false,
   },
@@ -82,11 +82,10 @@ export const TARIFF_CATALOG: Readonly<Record<Tariff, TariffPlan>> = {
       Feature.PriorityProcessing,
     ],
     limits: {
-      // [TODO: уточнить у заказчика] точные лимиты генераций/постов для Богатырского.
       [LimitKey.ContentGenerationsPerMonth]: 1000,
       [LimitKey.ScheduledPostsPerMonth]: UNLIMITED,
       [LimitKey.ConnectedChannels]: UNLIMITED, // spec: «многоканальность»
-      [LimitKey.LandingPages]: UNLIMITED,
+      [LimitKey.LandingPages]: UNLIMITED, // конструктор сайтов — только здесь
     },
     priority: true,
   },

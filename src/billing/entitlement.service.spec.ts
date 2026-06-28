@@ -34,6 +34,18 @@ describe('EntitlementService', () => {
         Tariff.Bogatyr,
       ]);
     });
+
+    it('конструктор сайтов — только Богатырский (решение заказчика)', () => {
+      expect(service.tariffsWithFeature(Feature.SiteBuilder)).toEqual([
+        Tariff.Bogatyr,
+      ]);
+      expect(service.hasFeature(Tariff.Free, Feature.SiteBuilder)).toBe(false);
+      expect(service.hasFeature(Tariff.Lite, Feature.SiteBuilder)).toBe(false);
+    });
+
+    it('автопостинг входит в Free (с жёстким лимитом)', () => {
+      expect(service.hasFeature(Tariff.Free, Feature.Autoposting)).toBe(true);
+    });
   });
 
   describe('лимиты', () => {
