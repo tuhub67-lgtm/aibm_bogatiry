@@ -1,4 +1,5 @@
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsIn,
@@ -8,10 +9,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-
-/** Каналы публикации. Приоритет MVP — Telegram (spec п.3). */
-export const PUBLISH_CHANNELS = ['telegram', 'vk'] as const;
-export type PublishChannel = (typeof PUBLISH_CHANNELS)[number];
+import { PUBLISH_CHANNELS, PublishChannel } from '../../../posting/channel.types';
 
 export class SchedulePostDto {
   @IsArray()
@@ -23,6 +21,13 @@ export class SchedulePostDto {
   @MinLength(1)
   @MaxLength(4096)
   text!: string;
+
+  /** Ссылки/идентификаторы медиа. Адаптер усечёт под лимит платформы. */
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMaxSize(10)
+  @IsOptional()
+  media?: string[];
 
   /** Время публикации (ISO 8601). Без него — ближайший слот очереди. */
   @IsISO8601()
