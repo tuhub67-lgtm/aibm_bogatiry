@@ -6,11 +6,17 @@ import { Feature, LimitKey } from '../../billing/entitlement.types';
 import { Subscription } from '../../billing/subscription';
 import { EntitlementService } from '../../billing/entitlement.service';
 import { GenerateDraftDto } from './dto/generate-draft.dto';
+import { ContentService } from './content.service';
 
 interface DraftResponse {
-  /** Несколько вариантов-черновиков, а не один «стерильный» финал (spec п.4). */
+  /** Варианты-черновики (а не один «стерильный» финал), spec п.4. */
   variants: string[];
+  /** Каркас поста из пресета формата. */
+  outline: string[];
+  guidance: string;
   format: string;
+  provider: string;
+  model: string;
   /** Обязательный UX-шаг: правка перед публикацией (spec п.4, принцип доверия). */
   requiresEditBeforePublish: true;
   note: string;
@@ -18,37 +24,47 @@ interface DraftResponse {
 
 /**
  * Модуль 2 — Генератор контент-стратегий и медиа.
- * Закрыт фичей ContentGeneration. Каждая генерация списывает лимит
- * ContentGenerationsPerMonth через EntitlementService.consume().
+ * Закрыт фичей ContentGeneration. Списывает лимит ContentGenerationsPerMonth
+ * по факту успешной генерации (не штрафуем за упавший вызов AI-шлюза).
  */
 @UseGuards(EntitlementGuard)
 @RequireFeature(Feature.ContentGeneration)
 @Controller('content')
 export class ContentController {
-  constructor(private readonly entitlements: EntitlementService) {}
+  constructor(
+    private readonly entitlements: EntitlementService,
+    private readonly content: ContentService,
+  ) {}
 
   @Post('drafts')
   async generateDraft(
     @CurrentSubscription() subscription: Subscription,
     @Body() dto: GenerateDraftDto,
   ): Promise<DraftResponse> {
-    // Списываем лимит ДО генерации: бросит LimitExceededError (403), если
-    // исчерпан. Реальная генерация подключается через AI-gateway.
-    await this.entitlements.consume(
+    // 1) Предварительная проверка лимита (без списания) — бросит 403, если исчерпан.
+    await this.entitlements.assertWithinLimit(
       subscription,
       LimitKey.ContentGenerationsPerMonth,
       1,
     );
 
-    // [TODO] Реальная генерация черновиков через AI-gateway
-    // (YandexGPT 5 Lite для текста). Сейчас — каркас, чтобы виден был
-    // контракт ответа и списание лимита.
+    // 2) Генерация через AI-шлюз (или локальный фолбэк, если шлюз не настроен).
+    const draft = await this.content.generateDrafts(dto);
+
+    // 3) Списываем лимит по факту успеха.
+    await this.entitlements.recordUsage(
+      subscription,
+      LimitKey.ContentGenerationsPerMonth,
+      1,
+    );
+
     return {
-      variants: [
-        `[TODO: AI-gateway] Черновик 1 — «${dto.topic}» для ниши «${dto.niche}»`,
-        `[TODO: AI-gateway] Черновик 2 — альтернативный заголовок`,
-      ],
+      variants: draft.variants,
+      outline: draft.outline,
+      guidance: draft.guidance,
       format: dto.format,
+      provider: draft.provider,
+      model: draft.model,
       requiresEditBeforePublish: true,
       note: 'Добавьте реальный контекст (фото до/после, отзывы) перед публикацией.',
     };

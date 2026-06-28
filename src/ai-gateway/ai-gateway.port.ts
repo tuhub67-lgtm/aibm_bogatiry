@@ -31,6 +31,8 @@ export interface TextGenerationResult {
   variants: string[];
   /** Какой провайдер фактически обслужил запрос (для аудита/биллинга AI). */
   provider: string;
+  /** Какая модель выбрана маршрутизацией (для аудита/биллинга AI). */
+  model: string;
 }
 
 export interface ImageGenerationRequest {

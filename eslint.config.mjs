@@ -21,6 +21,15 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       // Декораторы NestJS используют пустые конструкторы/классы-маркеры.
       '@typescript-eslint/no-extraneous-class': 'off',
+      // Параметры с префиксом `_` — намеренно неиспользуемые (часть контракта).
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
   prettier,

@@ -119,4 +119,18 @@ export class EntitlementService {
     await this.assertWithinLimit(subscription, key, amount);
     await this.usage.increment(subscription.id, key, amount);
   }
+
+  /**
+   * Зафиксировать использование без проверки лимита. Для паттерна
+   * «проверить → выполнить расходную операцию → списать по факту успеха»:
+   * сначала assertWithinLimit, затем сама работа, затем recordUsage — чтобы
+   * не списывать квоту за упавшую генерацию/публикацию.
+   */
+  async recordUsage(
+    subscription: Subscription,
+    key: LimitKey,
+    amount = 1,
+  ): Promise<void> {
+    await this.usage.increment(subscription.id, key, amount);
+  }
 }
