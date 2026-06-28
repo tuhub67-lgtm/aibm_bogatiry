@@ -1,0 +1,24 @@
+# Зависимости
+/node_modules
+
+# Сборка
+/dist
+*.tsbuildinfo
+
+# Покрытие тестами
+/coverage
+
+# Окружение (секреты НЕ коммитим — только .env.example)
+.env
+.env.local
+.env.*.local
+
+# Логи
+*.log
+npm-debug.log*
+
+# Редакторы / ОС
+.DS_Store
+.idea
+.vscode
+*.swp
