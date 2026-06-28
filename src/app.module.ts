@@ -8,6 +8,7 @@ import { SiteBuilderModule } from './modules/site-builder/site-builder.module';
 import { ContentModule } from './modules/content/content.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { OnboardingModule } from './onboarding/onboarding.module';
 
 @Module({
   imports: [
@@ -24,6 +25,8 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     ContentModule,
     AutomationModule,
     AnalyticsModule,
+    // Предпродажный онбординг-квест (spec п.7).
+    OnboardingModule,
   ],
   controllers: [HealthController],
 })

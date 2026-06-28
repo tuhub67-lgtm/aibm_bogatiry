@@ -8,5 +8,7 @@ import { AiGatewayModule } from '../../ai-gateway/ai-gateway.module';
   imports: [AiGatewayModule],
   controllers: [ContentController],
   providers: [ContentService],
+  // Экспортируем для переиспользования демо-генерации в онбординг-квесте.
+  exports: [ContentService],
 })
 export class ContentModule {}
